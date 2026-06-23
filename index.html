@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ray's Kitchen | Estate Dining in Hillcrest</title>
+    <meta name="description" content="A hidden gem in the heart of Hillcrest. Experience elegant estate dining, exceptional service, and signature dishes at Ray's Kitchen.">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- GSAP Core & ScrollTrigger -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    
+    <!-- Lenis Smooth Scroll -->
+    <script src="https://cdn.jsdelivr.net/gh/studio-freight/lenis@1.0.29/bundled/lenis.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#0E0C0B',
+                        charcoal: '#1D1A18',
+                        ivory: '#F7F5F0',
+                        stone: '#E7E2D8',
+                        gold: '#B89B65',
+                        olive: '#4D5445',
+                        wood: '#7C5C44',
+                    },
+                    fontFamily: {
+                        serif: ['"Cormorant Garamond"', 'serif'],
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    letterSpacing: {
+                        widest: '.25em',
+                        superwide: '.4em',
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Base styles & Grain Texture */
+        body {
+            background-color: #0E0C0B;
+            color: #F7F5F0;
+            overflow-x: hidden;
+            cursor: default;
+        }
+
+        .noise-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.04;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* Hide scrollbar for cleaner look */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0E0C0B;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1D1A18;
+            border-radius: 0px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #B89B65;
+        }
+
+        /* Typography Utilities */
+        .text-balance {
+            text-wrap: balance;
+        }
+
+        /* Custom Button Hover - Sharp Edges */
+        .btn-luxury {
+            position: relative;
+            overflow: hidden;
+            border: 1px solid #B89B65;
+            color: #B89B65;
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            background: transparent;
+        }
+        .btn-luxury::before {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 0%;
+            background-color: #B89B65;
+            transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: -1;
+        }
+        .btn-luxury:hover {
+            color: #0E0C0B;
+        }
+        .btn-luxury:hover::before {
+            height: 100%;
+        }
+        
+        .btn-luxury-solid {
+            border: 1px solid #B89B65;
+            background-color: #B89B65;
+            color: #0E0C0B;
+            transition: all 0.6s ease;
+        }
+        .btn-luxury-solid:hover {
+            background-color: transparent;
+            color: #B89B65;
+        }
+
+        /* Menu Image Hover Effect */
+        .menu-card {
+            overflow: hidden;
+        }
+        .menu-card img {
+            transition: transform 1.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .menu-card:hover img {
+            transform: scale(1.05);
+        }
+
+        /* Loader Animation Styles */
+        #loader {
+            position: fixed;
+            inset: 0;
+            background-color: #0E0C0B;
+            z-index: 10000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .svg-logo path, .svg-logo circle {
+            stroke: #B89B65;
+            stroke-width: 1;
+            fill: none;
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+        }
+        .loader-text {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        /* Nav Transition */
+        #navbar {
+            transition: background-color 0.5s ease, padding 0.5s ease, border-bottom 0.5s ease;
+            border-bottom: 1px solid transparent;
+        }
+        #navbar.scrolled {
+            background-color: rgba(14, 12, 11, 0.95);
+            backdrop-filter: blur(10px);
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(184, 155, 101, 0.2);
+        }
+
+        /* Parallax Backgrounds */
+        .parallax-bg {
+            background-attachment: fixed;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-size: cover;
+        }
+        
+        /* Form Inputs */
+        input, select, textarea {
+            border-radius: 0 !important;
+            appearance: none;
+            -webkit-appearance: none;
+        }
+        
+        /* Swiper custom styles override */
+        .swiper-wrapper {
+            transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+    </style>
+</head>
+<body class="font-sans antialiased text-stone selection:bg-gold selection:text-primary">
+
+    <div class="noise-overlay"></div>
+
+    <!-- Cinematic Loader -->
+    <div id="loader">
+        <div class="relative w-48 h-48 md:w-64 md:h-64 flex items-center justify-center mb-8">
+            <!-- Custom animated logo vector representing heritage -->
+            <svg class="svg-logo absolute inset-0 w-full h-full" viewBox="0 0 100 100">
+                <!-- Outer Circle -->
+                <circle cx="50" cy="50" r="48" />
+                <!-- Inner Circle -->
+                <circle cx="50" cy="50" r="42" />
+                <!-- Crossed Knives Motif (Abstracted for elegance) -->
+                <path d="M30 70 L70 30 M70 70 L30 30" />
+            </svg>
+            
+            <div class="absolute inset-0 flex flex-col items-center justify-center text-gold text-center pt-2">
+                <span class="loader-text font-serif text-xl tracking-[0.3em] uppercase mb-1">Ray's</span>
+                <span class="loader-text font-sans text-[0.5rem] tracking-widest uppercase mb-1">Estate Dining</span>
+                <span class="loader-text font-serif text-xl tracking-[0.3em] uppercase">Kitchen</span>
+            </div>
+        </div>
+        <div class="loader-text mt-4 flex items-center space-x-3 text-gold">
+            <span class="h-px w-8 bg-gold"></span>
+            <span class="font-sans text-xs tracking-[0.2em] uppercase">Hillcrest, South Africa</span>
+            <span class="h-px w-8 bg-gold"></span>
+        </div>
+    </div>
+
+    <!-- Floating Navigation -->
+    <nav id="navbar" class="fixed w-full z-50 top-0 py-6 px-6 md:px-12 flex justify-between items-center text-ivory">
+        <div class="font-serif text-2xl md:text-3xl tracking-widest uppercase text-gold cursor-pointer">
+            R<span class="text-sm align-top">ay's</span>
+        </div>
+        
+        <!-- Desktop Nav -->
+        <div class="hidden md:flex space-x-8 items-center font-sans text-xs tracking-widest uppercase">
+            <a href="#about" class="hover:text-gold transition-colors duration-300">Our Story</a>
+            <a href="#menu" class="hover:text-gold transition-colors duration-300">Menu</a>
+            <a href="#gallery" class="hover:text-gold transition-colors duration-300">Gallery</a>
+            <a href="#reservations" class="btn-luxury px-6 py-3">Reserve</a>
+        </div>
+
+        <!-- Mobile Menu Button -->
+        <button id="mobile-menu-btn" class="md:hidden flex flex-col space-y-1.5 focus:outline-none z-50">
+            <span class="w-8 h-[1px] bg-gold block transition-transform duration-300 origin-right"></span>
+            <span class="w-8 h-[1px] bg-gold block transition-opacity duration-300"></span>
+            <span class="w-8 h-[1px] bg-gold block transition-transform duration-300 origin-right"></span>
+        </button>
+    </nav>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobile-menu" class="fixed inset-0 bg-primary z-40 flex flex-col items-center justify-center opacity-0 pointer-events-none transition-opacity duration-500">
+        <div class="flex flex-col items-center space-y-8 font-serif text-2xl uppercase tracking-widest text-stone">
+            <a href="#about" class="mobile-link hover:text-gold transition-colors">Our Story</a>
+            <div class="h-px w-12 bg-gold/30"></div>
+            <a href="#menu" class="mobile-link hover:text-gold transition-colors">Menu</a>
+            <div class="h-px w-12 bg-gold/30"></div>
+            <a href="#gallery" class="mobile-link hover:text-gold transition-colors">Gallery</a>
+            <div class="h-px w-12 bg-gold/30"></div>
+            <a href="#reservations" class="mobile-link text-gold">Reserve a Table</a>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <header id="hero" class="relative h-screen w-full flex items-center justify-center overflow-hidden">
+        <!-- Background Image/Video (Using high-res placeholder resembling an estate at sunset/fire) -->
+        <div class="absolute inset-0 w-full h-full z-0">
+            <div class="absolute inset-0 bg-black/50 z-10"></div> <!-- Overlay -->
+            <img src="https://images.unsplash.com/photo-1544148103-0773bf10d330?q=80&w=2070&auto=format&fit=crop" 
+                 alt="Estate Dining Background" 
+                 class="hero-img w-full h-full object-cover transform scale-105" />
+        </div>
+
+        <div class="relative z-20 text-center px-4 mt-20">
+            <div class="hero-content opacity-0 translate-y-10">
+                <p class="font-sans text-xs md:text-sm tracking-[0.4em] text-gold uppercase mb-6 flex items-center justify-center space-x-4">
+                    <span class="w-12 h-px bg-gold"></span>
+                    <span>Estate Dining</span>
+                    <span class="w-12 h-px bg-gold"></span>
+                </p>
+                <h1 class="font-serif text-5xl md:text-7xl lg:text-8xl tracking-wider uppercase mb-8 text-ivory text-balance leading-tight">
+                    Ray's Kitchen
+                </h1>
+                <p class="font-serif text-xl md:text-2xl text-stone italic mb-12">
+                    Where great food meets great company.
+                </p>
+                <div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-6">
+                    <a href="#reservations" class="btn-luxury px-10 py-4 w-full sm:w-auto text-center">Reserve a Table</a>
+                    <a href="#menu" class="font-sans text-xs tracking-widest uppercase border-b border-transparent hover:border-gold pb-1 transition-all duration-300">Explore Menu</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scroll indicator -->
+        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 z-20 flex flex-col items-center">
+            <span class="font-sans text-[10px] tracking-widest uppercase text-gold mb-2">Scroll</span>
+            <div class="w-px h-16 bg-gradient-to-b from-gold to-transparent"></div>
+        </div>
+    </header>
+
+    <!-- Divider -->
+    <div class="w-full bg-primary py-16 flex justify-center">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#B89B65" stroke-width="1" class="opacity-50">
+            <path d="M12 2L15 9L22 12L15 15L12 22L9 15L2 12L9 9L12 2Z"/>
+        </svg>
+    </div>
+
+    <!-- About Section (Editorial Layout) -->
+    <section id="about" class="bg-primary py-20 px-6 md:px-12 lg:px-24">
+        <div class="max-w-7xl mx-auto flex flex-col lg:flex-row items-center gap-16 lg:gap-24">
+            
+            <!-- Image Side -->
+            <div class="w-full lg:w-1/2 relative group">
+                <div class="absolute -inset-4 border border-gold/20 z-0 hidden md:block"></div>
+                <div class="relative z-10 overflow-hidden reveal-img">
+                    <img src="https://images.unsplash.com/photo-1600891964092-4316c288032e?q=80&w=2070&auto=format&fit=crop" 
+                         alt="Interior of Ray's Kitchen" 
+                         class="w-full h-auto object-cover grayscale-[20%] group-hover:grayscale-0 transition-all duration-1000 ease-in-out transform group-hover:scale-105" />
+                </div>
+                <div class="absolute -bottom-8 -right-8 bg-charcoal p-6 border border-gold/30 z-20 hidden md:block w-48 text-center reveal-text">
+                    <span class="block font-serif text-3xl text-gold mb-2">Est.</span>
+                    <span class="font-sans text-xs tracking-widest uppercase text-stone">Heritage Living</span>
+                </div>
+            </div>
+
+            <!-- Text Side -->
+            <div class="w-full lg:w-1/2 reveal-text">
+                <div class="flex items-center space-x-4 mb-6">
+                    <span class="text-gold font-serif italic text-xl">Our Story</span>
+                    <div class="flex-grow h-px bg-charcoal"></div>
+                </div>
+                <h2 class="font-serif text-4xl md:text-5xl uppercase tracking-wider mb-8 leading-tight">
+                    A Hidden Gem in the <br>Heart of Hillcrest
+                </h2>
+                <div class="font-sans text-stone/80 font-light leading-relaxed space-y-6 text-sm md:text-base">
+                    <p>
+                        Tucked away within the prestigious Emberton Estate, Ray's Kitchen offers an escape into a world of relaxed luxury. We believe that dining should be an immersive experience—a celebration of craft, warmth, and timeless elegance.
+                    </p>
+                    <p>
+                        Our culinary philosophy is rooted in sourcing the finest local ingredients and transforming them with artistry and fire. From our signature slow-roasted pork belly to expertly crafted cocktails, every detail is designed to make you feel at home, yet entirely transported.
+                    </p>
+                </div>
+                <div class="mt-12">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/f/f4/Signature_of_John_Hancock.svg/1200px-Signature_of_John_Hancock.svg.png" alt="Signature" class="h-12 opacity-40 invert filter">
+                    <p class="font-sans text-xs tracking-widest uppercase text-gold mt-4">Executive Chef</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Signature Dishes (Parallax Background) -->
+    <section id="signature-dishes" class="relative py-32 bg-charcoal overflow-hidden">
+        <!-- Subtle noise over dark background -->
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0naHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmcnIHdpZHRoPSc0MDAnIGhlaWdodD0nNDAwJz48ZmlsdGVyIGlkPSduJz48ZmVUdXJidWxlbmNlIHR5cGU9J2ZyYWN0YWxOb2lzZScgYmFzZUZyZXF1ZW5jeT0nMC44JyBudW1PY3RhdmVzPSc0JyBzdGl0Y2hUaWxlcz0nc3RpdGNoJy8+PC9maWx0ZXI+PHJlY3Qgd2lkdGg9JzQwMCcgaGVpZ2h0PSc0MDAnIGZpbHRlcj0ndXJsKCNuKScgb3BhY2l0eT0nMC4wNScvPjwvc3ZnPg==')] opacity-20 pointer-events-none"></div>
+        
+        <div class="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
+            <div class="text-center mb-20 reveal-text">
+                <span class="font-sans text-xs tracking-widest uppercase text-gold mb-4 block">Culinary Artistry</span>
+                <h2 class="font-serif text-4xl md:text-5xl uppercase tracking-wider">Signature Dishes</h2>
+                <div class="flex items-center justify-center space-x-4 mt-6">
+                    <div class="h-px bg-gold/30 w-16"></div>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#B89B65" stroke-width="1"><circle cx="12" cy="12" r="10"/></svg>
+                    <div class="h-px bg-gold/30 w-16"></div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Dish 1 -->
+                <div class="menu-card bg-primary border border-charcoal group cursor-pointer reveal-card relative">
+                    <div class="absolute top-4 left-4 z-20 text-gold font-serif italic text-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500">Must Try</div>
+                    <div class="h-80 overflow-hidden relative">
+                        <div class="absolute inset-0 bg-primary/20 group-hover:bg-transparent transition-colors duration-500 z-10"></div>
+                        <img src="https://images.unsplash.com/photo-1621841957884-1210fe19b66d?q=80&w=2070&auto=format&fit=crop" alt="Pork Belly" class="w-full h-full object-cover">
+                    </div>
+                    <div class="p-8 text-center border-t border-charcoal relative z-20 bg-primary">
+                        <h3 class="font-serif text-2xl uppercase tracking-wide mb-3 text-ivory">Slow Roasted Pork Belly</h3>
+                        <p class="font-sans text-sm text-stone/70 font-light mb-4">Crispy crackling, pomme purée, charred tenderstem broccoli, apple cider jus.</p>
+                        <div class="h-px w-12 bg-gold/50 mx-auto"></div>
+                    </div>
+                </div>
+
+                <!-- Dish 2 -->
+                <div class="menu-card bg-primary border border-charcoal group cursor-pointer reveal-card md:-translate-y-12 relative">
+                    <div class="h-80 overflow-hidden relative">
+                        <div class="absolute inset-0 bg-primary/20 group-hover:bg-transparent transition-colors duration-500 z-10"></div>
+                        <img src="https://images.unsplash.com/photo-1579584425555-c3ce17fd4351?q=80&w=1927&auto=format&fit=crop" alt="Tuna Lollipops" class="w-full h-full object-cover">
+                    </div>
+                    <div class="p-8 text-center border-t border-charcoal relative z-20 bg-primary">
+                        <h3 class="font-serif text-2xl uppercase tracking-wide mb-3 text-ivory">Tuna Lollipops</h3>
+                        <p class="font-sans text-sm text-stone/70 font-light mb-4">Seared yellowfin tuna, sesame crust, ginger-soy glaze, wasabi aioli.</p>
+                        <div class="h-px w-12 bg-gold/50 mx-auto"></div>
+                    </div>
+                </div>
+
+                <!-- Dish 3 -->
+                <div class="menu-card bg-primary border border-charcoal group cursor-pointer reveal-card relative">
+                    <div class="h-80 overflow-hidden relative">
+                        <div class="absolute inset-0 bg-primary/20 group-hover:bg-transparent transition-colors duration-500 z-10"></div>
+                        <img src="https://images.unsplash.com/photo-1544025162-81111420d4d7?q=80&w=2069&auto=format&fit=crop" alt="Seafood Platter" class="w-full h-full object-cover">
+                    </div>
+                    <div class="p-8 text-center border-t border-charcoal relative z-20 bg-primary">
+                        <h3 class="font-serif text-2xl uppercase tracking-wide mb-3 text-ivory">Wood-Fired Prawns</h3>
+                        <p class="font-sans text-sm text-stone/70 font-light mb-4">Mozambican style peri-peri, garlic butter, fire-roasted lemon, artisan bread.</p>
+                        <div class="h-px w-12 bg-gold/50 mx-auto"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-16 reveal-text">
+                <a href="#menu" class="font-sans text-xs tracking-[0.2em] uppercase text-stone hover:text-gold transition-colors pb-1 border-b border-gold/30 hover:border-gold inline-block">View Full Menu</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Menu Section (Paper Texture Style) -->
+    <section id="menu" class="py-32 bg-ivory text-primary relative">
+        <!-- Subtle paper texture overlay -->
+        <div class="absolute inset-0 opacity-50 pointer-events-none" style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.65%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E'); mix-blend-mode: multiply;"></div>
+
+        <div class="max-w-5xl mx-auto px-6 relative z-10">
+            <div class="text-center mb-16">
+                <h2 class="font-serif text-5xl md:text-6xl uppercase tracking-wider mb-4">The Menu</h2>
+                <p class="font-serif text-xl italic text-wood">Crafted with passion, served with elegance.</p>
+            </div>
+
+            <!-- Menu Categories (Interactive) -->
+            <div class="flex flex-wrap justify-center gap-6 mb-16 font-sans text-xs tracking-widest uppercase border-y border-charcoal/20 py-6">
+                <button class="menu-tab active text-primary font-semibold relative after:content-[''] after:absolute after:-bottom-6 after:left-0 after:w-full after:h-[2px] after:bg-primary" data-target="starters">Starters</button>
+                <button class="menu-tab text-stone hover:text-primary transition-colors relative after:content-[''] after:absolute after:-bottom-6 after:left-0 after:w-0 after:h-[2px] after:bg-primary after:transition-all hover:after:w-full" data-target="mains">Mains</button>
+                <button class="menu-tab text-stone hover:text-primary transition-colors relative after:content-[''] after:absolute after:-bottom-6 after:left-0 after:w-0 after:h-[2px] after:bg-primary after:transition-all hover:after:w-full" data-target="grill">From The Grill</button>
+                <button class="menu-tab text-stone hover:text-primary transition-colors relative after:content-[''] after:absolute after:-bottom-6 after:left-0 after:w-0 after:h-[2px] after:bg-primary after:transition-all hover:after:w-full" data-target="desserts">Desserts</button>
+            </div>
+
+            <!-- Menu Content Area -->
+            <div class="menu-content-container relative min-h-[400px]">
+                
+                <!-- Starters -->
+                <div id="starters" class="menu-pane absolute inset-0 opacity-100 transition-opacity duration-700">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-10">
+                        <div class="menu-item flex justify-between items-start border-b border-charcoal/10 pb-4">
+                            <div class="pr-4">
+                                <h4 class="font-serif text-xl uppercase tracking-wide mb-1">Beef Carpaccio</h4>
+                                <p class="font-sans text-sm text-wood font-light">Truffle oil, shaved parmesan, capers, micro herbs.</p>
+                            </div>
+                            <span class="font-serif text-lg">R145</span>
+                        </div>
+                        <div class="menu-item flex justify-between items-start border-b border-charcoal/10 pb-4">
+                            <div class="pr-4">
+                                <h4 class="font-serif text-xl uppercase tracking-wide mb-1">Calamari Salad</h4>
+                                <p class="font-sans text-sm text-wood font-light">Flash-fried patron tubes, rocket, cherry tomatoes, lemon vinaigrette.</p>
+                            </div>
+                            <span class="font-serif text-lg">R130</span>
+                        </div>
+                        <div class="menu-item flex justify-between items-start border-b border-charcoal/10 pb-4">
+                            <div class="pr-4">
+                                <h4 class="font-serif text-xl uppercase tracking-wide mb-1">Burrata & Heirloom</h4>
+                                <p class="font-sans text-sm text-wood font-light">Fresh burrata, balsamic glaze, basil pesto, pine nuts.</p>
+                            </div>
+                            <span class="font-serif text-lg">R165</span>
+                        </div>
+                        <div class="menu-item flex justify-between items-start border-b border-charcoal/10 pb-4">
+                            <div class="pr-4">
+                                <h4 class="font-serif text-xl uppercase tracking-wide mb-1">Oysters (Half Dozen)</h4>
+                                <p class="font-sans text-sm text-wood font-light">Freshly shucked, served with mignonette and lemon.</p>
+                            </div>
+                            <span class="font-serif text-lg">SQ</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mains (Hidden initially) -->
+                <div id="mains" class="menu-pane absolute inset-0 opacity-0 pointer-events-none transition-opacity duration-700">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-16 gap-y-10">
+                         <div class="menu-item flex justify-between items-start border-b border-charcoal/10 pb-4">
+                            <div class="pr-4">
+                                <h4 class="font-serif text-xl uppercase tracking-wide mb-1">Wild Mushroom Risotto</h4>
+                                <p class="font-sans text-sm text-wood font-light">Porcini broth, truffle butter, aged parmesan crisp.</p>
+                            </div>
+                            <span class="font-serif text-lg">R210</span>
+                        </div>
+                        <div class="menu-item flex justify-between items-start border-b border-charcoal/10 pb-4">
+                            <div class="pr-4">
+                                <h4 class="font-serif text-xl uppercase tracking-wide mb-1">Catch of the Day</h4>
+                                <p class="font-sans text-sm text-wood font-light">Pan-seared, asparagus, lemon-caper beurre blanc.</p>
+                            </div>
+                            <span class="font-serif text-lg">R280</span>
+                        </div>
+                        <div class="menu-item flex justify-between items-start border-b border-charcoal/10 pb-4">
+                            <div class="pr-4">
+                                <h4 class="font-serif text-xl uppercase tracking-wide mb-1">Duck Breast</h4>
+                                <p class="font-sans text-sm text-wood font-light">Confit leg croquette, cherry reduction, sweet potato purée.</p>
+                            </div>
+                            <span class="font-serif text-lg">R310</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="text-center mt-12">
+                <p class="font-sans text-xs uppercase tracking-widest text-wood">A 10% gratuity is added to tables of 6 or more.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Chef Recommendation (Cinematic Dark) -->
+    <section class="py-24 bg-primary relative overflow-hidden">
+        <div class="max-w-7xl mx-auto px-6 md:px-12 flex flex-col md:flex-row items-center">
+            <div class="w-full md:w-1/2 z-10 mb-10 md:mb-0 md:pr-16 reveal-text">
+                <span class="font-sans text-xs tracking-[0.3em] uppercase text-gold mb-4 block">Chef's Selection</span>
+                <h2 class="font-serif text-4xl md:text-5xl uppercase tracking-wider mb-6 text-ivory leading-tight">Tomahawk Steak <br>For Two</h2>
+                <p class="font-sans text-stone/80 font-light mb-8 leading-relaxed">
+                    A masterpiece of the grill. 800g bone-in ribeye, dry-aged for 35 days. Served with bone marrow butter, hand-cut truffle fries, and a selection of house-made sauces.
+                </p>
+                <a href="#reservations" class="btn-luxury px-8 py-3 inline-block">Book This Experience</a>
+            </div>
+            <div class="w-full md:w-1/2 relative h-[500px] reveal-img">
+                <div class="absolute inset-0 border border-gold/20 translate-x-4 -translate-y-4"></div>
+                <img src="https://images.unsplash.com/photo-1546833999-b9f581a1996d?q=80&w=2070&auto=format&fit=crop" alt="Tomahawk Steak" class="w-full h-full object-cover relative z-10 filter brightness-90">
+            </div>
+        </div>
+    </section>
+
+    <!-- Atmosphere Gallery (Masonry) -->
+    <section id="gallery" class="py-32 bg-charcoal">
+        <div class="max-w-7xl mx-auto px-6 md:px-12">
+            <div class="text-center mb-16 reveal-text">
+                <h2 class="font-serif text-4xl md:text-5xl uppercase tracking-wider mb-4 text-ivory">The Atmosphere</h2>
+                <div class="h-px bg-gold w-24 mx-auto"></div>
+            </div>
+
+            <div class="columns-1 md:columns-2 lg:columns-3 gap-6 space-y-6">
+                <!-- Image 1 -->
+                <div class="break-inside-avoid overflow-hidden group border border-primary/50 relative cursor-pointer">
+                    <div class="absolute inset-0 bg-primary/40 group-hover:bg-transparent transition-colors duration-500 z-10"></div>
+                    <img src="https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=2070&auto=format&fit=crop" alt="Cocktails" class="w-full h-auto transform group-hover:scale-105 transition-transform duration-700">
+                </div>
+                <!-- Image 2 -->
+                <div class="break-inside-avoid overflow-hidden group border border-primary/50 relative cursor-pointer">
+                    <div class="absolute inset-0 bg-primary/40 group-hover:bg-transparent transition-colors duration-500 z-10"></div>
+                    <img src="https://images.unsplash.com/photo-1559339352-11d035aa65de?q=80&w=1974&auto=format&fit=crop" alt="Estate Dining Table" class="w-full h-auto transform group-hover:scale-105 transition-transform duration-700">
+                </div>
+                <!-- Image 3 -->
+                <div class="break-inside-avoid overflow-hidden group border border-primary/50 relative cursor-pointer">
+                    <div class="absolute inset-0 bg-primary/40 group-hover:bg-transparent transition-colors duration-500 z-10"></div>
+                    <img src="https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?q=80&w=2070&auto=format&fit=crop" alt="Restaurant Interior" class="w-full h-auto transform group-hover:scale-105 transition-transform duration-700">
+                </div>
+                 <!-- Image 4 -->
+                <div class="break-inside-avoid overflow-hidden group border border-primary/50 relative cursor-pointer">
+                    <div class="absolute inset-0 bg-primary/40 group-hover:bg-transparent transition-colors duration-500 z-10"></div>
+                    <img src="https://images.unsplash.com/photo-1414235077428-33898dd1458c?q=80&w=2070&auto=format&fit=crop" alt="Fine Food" class="w-full h-auto transform group-hover:scale-105 transition-transform duration-700">
+                </div>
+                <!-- Image 5 -->
+                <div class="break-inside-avoid overflow-hidden group border border-primary/50 relative cursor-pointer">
+                    <div class="absolute inset-0 bg-primary/40 group-hover:bg-transparent transition-colors duration-500 z-10"></div>
+                    <img src="https://images.unsplash.com/photo-1528605248644-14dd04022da1?q=80&w=2070&auto=format&fit=crop" alt="Wine Pour" class="w-full h-auto transform group-hover:scale-105 transition-transform duration-700">
+                </div>
+                <!-- Image 6 -->
+                <div class="break-inside-avoid overflow-hidden group border border-primary/50 relative cursor-pointer">
+                    <div class="absolute inset-0 bg-primary/40 group-hover:bg-transparent transition-colors duration-500 z-10"></div>
+                    <img src="https://images.unsplash.com/photo-1466978913421-bac2e5e75e4e?q=80&w=2042&auto=format&fit=crop" alt="Fire Cooking" class="w-full h-auto transform group-hover:scale-105 transition-transform duration-700">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Reservation System -->
+    <section id="reservations" class="py-32 bg-primary relative">
+        <div class="max-w-4xl mx-auto px-6">
+            <div class="text-center mb-16 reveal-text">
+                <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#B89B65" stroke-width="1" class="mx-auto mb-6">
+                    <path d="M12 2L15 9L22 12L15 15L12 22L9 15L2 12L9 9L12 2Z"/>
+                </svg>
+                <h2 class="font-serif text-4xl md:text-5xl uppercase tracking-wider mb-4 text-ivory">Reserve a Table</h2>
+                <p class="font-sans text-stone/80 text-sm tracking-wide">Join us for an unforgettable estate dining experience.</p>
+            </div>
+
+            <form id="booking-form" class="space-y-8 bg-charcoal p-8 md:p-12 border border-gold/20 relative z-10">
+                <!-- Top border detail -->
+                <div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-gold to-transparent"></div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div class="space-y-2">
+                        <label class="font-sans text-xs tracking-widest uppercase text-gold">Full Name</label>
+                        <input type="text" required class="w-full bg-transparent border-b border-stone/30 focus:border-gold text-ivory py-2 outline-none transition-colors font-serif text-xl">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="font-sans text-xs tracking-widest uppercase text-gold">Phone Number</label>
+                        <input type="tel" required class="w-full bg-transparent border-b border-stone/30 focus:border-gold text-ivory py-2 outline-none transition-colors font-serif text-xl">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="font-sans text-xs tracking-widest uppercase text-gold">Date</label>
+                        <input type="date" required class="w-full bg-transparent border-b border-stone/30 focus:border-gold text-ivory py-2 outline-none transition-colors font-serif text-xl text-stone/50 focus:text-ivory">
+                    </div>
+                    <div class="space-y-2">
+                        <label class="font-sans text-xs tracking-widest uppercase text-gold">Time</label>
+                        <select required class="w-full bg-charcoal border-b border-stone/30 focus:border-gold text-ivory py-2 outline-none transition-colors font-serif text-xl cursor-pointer">
+                            <option value="" disabled selected>Select a time</option>
+                            <option value="18:00">18:00 PM</option>
+                            <option value="18:30">18:30 PM</option>
+                            <option value="19:00">19:00 PM</option>
+                            <option value="19:30">19:30 PM</option>
+                            <option value="20:00">20:00 PM</option>
+                            <option value="20:30">20:30 PM</option>
+                        </select>
+                    </div>
+                    <div class="space-y-2 md:col-span-2">
+                        <label class="font-sans text-xs tracking-widest uppercase text-gold">Number of Guests</label>
+                        <select required class="w-full bg-charcoal border-b border-stone/30 focus:border-gold text-ivory py-2 outline-none transition-colors font-serif text-xl cursor-pointer">
+                            <option value="2">2 Guests</option>
+                            <option value="3">3 Guests</option>
+                            <option value="4">4 Guests</option>
+                            <option value="5">5 Guests</option>
+                            <option value="6">6 Guests</option>
+                            <option value="large">7+ Guests (Please call)</option>
+                        </select>
+                    </div>
+                     <div class="space-y-2 md:col-span-2">
+                        <label class="font-sans text-xs tracking-widest uppercase text-gold">Special Requests / Occasion</label>
+                        <textarea rows="2" class="w-full bg-transparent border-b border-stone/30 focus:border-gold text-ivory py-2 outline-none transition-colors font-serif text-xl resize-none"></textarea>
+                    </div>
+                </div>
+
+                <div class="pt-8 text-center">
+                    <button type="submit" class="btn-luxury-solid px-12 py-4 w-full md:w-auto font-sans text-sm tracking-[0.2em] uppercase font-semibold">
+                        Confirm Reservation
+                    </button>
+                    <p class="mt-6 font-sans text-xs text-stone/60">or book via <a href="#" class="text-gold border-b border-gold/30 hover:border-gold pb-0.5 transition-all">WhatsApp</a></p>
+                </div>
+
+                <!-- Success Message (Hidden by default) -->
+                <div id="form-success" class="hidden absolute inset-0 bg-charcoal flex-col items-center justify-center text-center z-20">
+                    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#B89B65" stroke-width="1" class="mb-6">
+                        <path d="M20 6L9 17l-5-5"/>
+                    </svg>
+                    <h3 class="font-serif text-3xl text-ivory mb-2">Request Received</h3>
+                    <p class="font-sans text-stone text-sm">We will contact you shortly to confirm your table.</p>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <!-- Location Section (Minimal Map visual) -->
+    <section id="location" class="relative h-[60vh] bg-charcoal flex items-center justify-center overflow-hidden border-t border-primary">
+        <!-- Abstract Map representation / Estate image -->
+        <div class="absolute inset-0 opacity-30 grayscale mix-blend-luminosity">
+            <img src="https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2070&auto=format&fit=crop" alt="Estate Aerial" class="w-full h-full object-cover">
+        </div>
+        <div class="absolute inset-0 bg-primary/80"></div>
+        
+        <div class="relative z-10 text-center px-6">
+            <h2 class="font-serif text-3xl uppercase tracking-widest text-gold mb-6">The Estate</h2>
+            <div class="font-sans text-stone space-y-2 mb-8 text-sm md:text-base">
+                <p>Ray's Kitchen at Emberton Estate</p>
+                <p>90 Ashley Drive</p>
+                <p>Hillcrest, 3610</p>
+            </div>
+            <div class="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6">
+                <a href="#" class="font-sans text-xs tracking-widest uppercase border border-stone text-stone hover:bg-stone hover:text-primary transition-colors py-3 px-8 w-full sm:w-auto">Get Directions</a>
+                <a href="tel:+2700000000" class="font-sans text-xs tracking-widest uppercase text-gold hover:text-ivory transition-colors">Call: +27 31 123 4567</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-[#0A0908] text-stone py-20 px-6 md:px-12 border-t border-gold/10">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
+            <!-- Brand -->
+            <div class="md:col-span-1">
+                <div class="font-serif text-2xl tracking-widest uppercase text-gold mb-6">
+                    Ray's <br>Kitchen
+                </div>
+                <p class="font-sans text-xs leading-relaxed text-stone/60 pr-4">
+                    Timeless elegance meets culinary artistry in the heart of Hillcrest.
+                </p>
+            </div>
+
+            <!-- Hours -->
+            <div>
+                <h4 class="font-sans text-xs tracking-[0.2em] uppercase text-gold mb-6">Hours</h4>
+                <ul class="font-sans text-sm text-stone/80 space-y-3">
+                    <li class="flex justify-between border-b border-white/5 pb-2"><span>Tue - Thu</span> <span>12:00 - 21:00</span></li>
+                    <li class="flex justify-between border-b border-white/5 pb-2"><span>Fri - Sat</span> <span>12:00 - 22:00</span></li>
+                    <li class="flex justify-between border-b border-white/5 pb-2"><span>Sunday</span> <span>11:30 - 16:00</span></li>
+                    <li class="flex justify-between text-stone/50 pt-2"><span>Monday</span> <span>Closed</span></li>
+                </ul>
+            </div>
+
+            <!-- Links -->
+            <div>
+                <h4 class="font-sans text-xs tracking-[0.2em] uppercase text-gold mb-6">Explore</h4>
+                <ul class="font-sans text-sm text-stone/80 space-y-3 flex flex-col">
+                    <a href="#about" class="hover:text-gold transition-colors inline-block w-max">Our Story</a>
+                    <a href="#menu" class="hover:text-gold transition-colors inline-block w-max">Menu</a>
+                    <a href="#gallery" class="hover:text-gold transition-colors inline-block w-max">Atmosphere</a>
+                    <a href="#" class="hover:text-gold transition-colors inline-block w-max">Private Events</a>
+                    <a href="#" class="hover:text-gold transition-colors inline-block w-max">Gift Vouchers</a>
+                </ul>
+            </div>
+
+            <!-- Contact/Social -->
+            <div>
+                <h4 class="font-sans text-xs tracking-[0.2em] uppercase text-gold mb-6">Connect</h4>
+                <ul class="font-sans text-sm text-stone/80 space-y-3 flex flex-col mb-8">
+                    <a href="mailto:info@rayskitchen.co.za" class="hover:text-gold transition-colors">info@rayskitchen.co.za</a>
+                    <a href="#" class="hover:text-gold transition-colors">Instagram</a>
+                    <a href="#" class="hover:text-gold transition-colors">Facebook</a>
+                </ul>
+            </div>
+        </div>
+
+        <div class="max-w-7xl mx-auto mt-20 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center font-sans text-xs text-stone/40 uppercase tracking-widest">
+            <p>&copy; 2026 Ray's Kitchen. All Rights Reserved.</p>
+            <div class="flex space-x-6 mt-4 md:mt-0">
+                <a href="#" class="hover:text-gold transition-colors">Privacy</a>
+                <a href="#" class="hover:text-gold transition-colors">Terms</a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Ensure scripts run after DOM is fully loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            
+            // 1. Initialize Lenis Smooth Scroll
+            const lenis = new Lenis({
+                duration: 1.2,
+                easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // https://www.desmos.com/calculator/brs54l4xou
+                direction: 'vertical',
+                gestureDirection: 'vertical',
+                smooth: true,
+                mouseMultiplier: 1,
+                smoothTouch: false,
+                touchMultiplier: 2,
+                infinite: false,
+            });
+
+            function raf(time) {
+                lenis.raf(time);
+                requestAnimationFrame(raf);
+            }
+            requestAnimationFrame(raf);
+
+            // Sync GSAP ScrollTrigger with Lenis
+            gsap.registerPlugin(ScrollTrigger);
+            
+            // Update ScrollTrigger on Lenis scroll
+            lenis.on('scroll', ScrollTrigger.update);
+            
+            gsap.ticker.add((time)=>{
+              lenis.raf(time * 1000)
+            });
+            gsap.ticker.lagSmoothing(0);
+
+            // 2. Preloader Animation Sequence
+            const loaderTimeline = gsap.timeline({
+                onComplete: () => {
+                    document.getElementById('loader').style.display = 'none';
+                    // Allow scrolling after load
+                    document.body.style.overflowY = 'auto';
+                }
+            });
+
+            // Initially block scroll
+            document.body.style.overflowY = 'hidden';
+
+            // Draw SVG paths
+            loaderTimeline.to(".svg-logo path, .svg-logo circle", {
+                strokeDashoffset: 0,
+                duration: 2,
+                ease: "power2.inOut",
+                stagger: 0.3
+            })
+            // Fade in text
+            .to(".loader-text", {
+                opacity: 1,
+                y: 0,
+                duration: 1,
+                stagger: 0.2,
+                ease: "power2.out"
+            }, "-=1")
+            // Hold
+            .to({}, { duration: 0.5 })
+            // Fade out whole loader
+            .to("#loader", {
+                opacity: 0,
+                duration: 1.2,
+                ease: "power3.inOut"
+            })
+            // Reveal Hero Content
+            .to(".hero-content", {
+                opacity: 1,
+                y: 0,
+                duration: 1.5,
+                ease: "power3.out"
+            }, "-=0.5");
+
+
+            // 3. Navigation Sticky Effect
+            const navbar = document.getElementById('navbar');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            });
+
+            // Mobile Menu Toggle
+            const mobileBtn = document.getElementById('mobile-menu-btn');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const mobileLinks = document.querySelectorAll('.mobile-link');
+            let isMenuOpen = false;
+
+            function toggleMenu() {
+                isMenuOpen = !isMenuOpen;
+                const spans = mobileBtn.querySelectorAll('span');
+                
+                if (isMenuOpen) {
+                    mobileMenu.classList.remove('opacity-0', 'pointer-events-none');
+                    // Animate hamburger to X
+                    spans[0].style.transform = 'rotate(45deg) translate(5px, 5px)';
+                    spans[1].style.opacity = '0';
+                    spans[2].style.transform = 'rotate(-45deg) translate(5px, -5px)';
+                    lenis.stop(); // Stop scrolling when menu is open
+                } else {
+                    mobileMenu.classList.add('opacity-0', 'pointer-events-none');
+                    // Reset hamburger
+                    spans[0].style.transform = 'none';
+                    spans[1].style.opacity = '1';
+                    spans[2].style.transform = 'none';
+                    lenis.start();
+                }
+            }
+
+            mobileBtn.addEventListener('click', toggleMenu);
+            mobileLinks.forEach(link => {
+                link.addEventListener('click', () => {
+                    if(isMenuOpen) toggleMenu();
+                });
+            });
+
+
+            // 4. Scroll Animations (Elegant & Slow)
+            
+            // Text reveals
+            const revealTexts = document.querySelectorAll('.reveal-text');
+            revealTexts.forEach(text => {
+                gsap.fromTo(text, 
+                    { opacity: 0, y: 40 },
+                    {
+                        scrollTrigger: {
+                            trigger: text,
+                            start: "top 85%",
+                            toggleActions: "play none none reverse"
+                        },
+                        opacity: 1,
+                        y: 0,
+                        duration: 1.2,
+                        ease: "power3.out"
+                    }
+                );
+            });
+
+            // Image reveals (parallax effect)
+            const revealImgs = document.querySelectorAll('.reveal-img img');
+            revealImgs.forEach(img => {
+                gsap.fromTo(img,
+                    { scale: 1.2 },
+                    {
+                        scrollTrigger: {
+                            trigger: img.parentElement,
+                            start: "top bottom",
+                            end: "bottom top",
+                            scrub: 1 // Smooth scrubbing
+                        },
+                        scale: 1,
+                        ease: "none"
+                    }
+                );
+            });
+
+            // Card stagger reveals
+            gsap.from(".reveal-card", {
+                scrollTrigger: {
+                    trigger: "#signature-dishes",
+                    start: "top 70%",
+                },
+                y: 50,
+                opacity: 0,
+                duration: 1,
+                stagger: 0.2,
+                ease: "power3.out"
+            });
+
+
+            // 5. Interactive Menu Logic
+            const menuTabs = document.querySelectorAll('.menu-tab');
+            const menuPanes = document.querySelectorAll('.menu-pane');
+
+            menuTabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Remove active states
+                    menuTabs.forEach(t => {
+                        t.classList.remove('active', 'text-primary', 'font-semibold', 'after:w-full');
+                        t.classList.add('text-stone');
+                    });
+                    
+                    // Add active state to clicked
+                    tab.classList.remove('text-stone');
+                    tab.classList.add('active', 'text-primary', 'font-semibold', 'after:w-full');
+
+                    const targetId = tab.getAttribute('data-target');
+
+                    // Crossfade panes
+                    menuPanes.forEach(pane => {
+                        if (pane.id === targetId) {
+                            pane.classList.remove('opacity-0', 'pointer-events-none');
+                            pane.classList.add('opacity-100');
+                        } else {
+                            pane.classList.remove('opacity-100');
+                            pane.classList.add('opacity-0', 'pointer-events-none');
+                        }
+                    });
+                });
+            });
+
+            // 6. Form Submission Simulation
+            const form = document.getElementById('booking-form');
+            const successMsg = document.getElementById('form-success');
+
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                // Simulate processing
+                const btn = form.querySelector('button[type="submit"]');
+                const originalText = btn.innerText;
+                btn.innerText = "Processing...";
+                
+                setTimeout(() => {
+                    successMsg.classList.remove('hidden');
+                    successMsg.classList.add('flex');
+                    // Hide after a few seconds
+                    setTimeout(() => {
+                        successMsg.classList.add('hidden');
+                        successMsg.classList.remove('flex');
+                        btn.innerText = originalText;
+                        form.reset();
+                    }, 4000);
+                }, 1500);
+            });
+
+        });
+    </script>
+</body>
+</html>
